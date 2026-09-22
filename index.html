@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kuis IPAS Interaktif: Sistem Pernapasan & Faktor Lingkungan</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cyber: {
+              bg: '#0b0f19',
+              card: '#161e2e',
+              accent: '#06b6d4',
+              pink: '#ec4899',
+              green: '#10b981',
+              yellow: '#f59e0b',
+              red: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap');
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #0b0f19;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 40%);
+    }
+    .glass-panel {
+      background: rgba(22, 30, 46, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-cyber {
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px 0 rgba(6, 182, 212, 0.39);
+    }
+    .btn-cyber:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px 0 rgba(6, 182, 212, 0.55);
+    }
+  </style>
+</head>
+<body class="h-full min-h-screen flex flex-col justify-between p-3 md:p-6 overflow-x-hidden">
+
+  <!-- HEADER / TITLE BAR -->
+  <header class="glass-panel rounded-2xl p-4 mb-4 flex flex-wrap justify-between items-center gap-4 shadow-xl border-cyan-500/30 border">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-black text-2xl text-white shadow-lg shadow-cyan-500/50">
+        🫁
+      </div>
+      <div>
+        <h1 class="font-extrabold text-lg md:text-2xl tracking-wide bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
+          GIM KUIS IPAS 2D INTERAKTIF
+        </h1>
+        <p class="text-xs md:text-sm text-slate-400 font-medium">
+          Materi: <span class="text-cyan-400">Gangguan Pernapasan & Faktor Lingkungan</span>
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700">
+      <span class="text-xs text-slate-400">Pemain:</span>
+      <span id="display-player-name" class="font-bold text-pink-400">-</span>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="grow flex flex-col justify-center max-w-6xl w-full mx-auto">
+    
+    <!-- SCREEN 1: LOGIN / START SCREEN -->
+    <section id="screen-login" class="glass-panel rounded-3xl p-6 md:p-10 text-center max-w-md mx-auto w-full shadow-2xl border-slate-700/50">
+      <div class="mb-6 inline-block p-4 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-5xl">
+        🧪
+      </div>
+      <h2 class="text-2xl font-bold mb-2 text-white">Selamat Datang, Detektif Sains!</h2>
+      <p class="text-slate-400 text-sm mb-6">Uji pemahamanmu mengenai analisis kasus lingkungan, polusi, dan kesehatan sistem pernapasan manusia.</p>
+      
+      <form id="form-start" onsubmit="startGame(event)" class="space-y-4">
+        <div class="text-left">
+          <label for="player-name" class="block text-xs font-semibold text-slate-300 mb-1">Nama Lengkap / Panggilan:</label>
+          <input 
+            type="text" 
+            id="player-name" 
+            required 
+            placeholder="Ketik namamu di sini..."
+            class="w-full bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 rounded-xl px-4 py-3 text-white text-sm outline-none transition-all"
+            maxlength="25"
+          />
+        </div>
+        <button 
+          type="submit" 
+          class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 font-bold text-white tracking-wider uppercase text-sm btn-cyber">
+          🚀 Mulai Permainan (25 Soal)
+        </button>
+      </form>
+    </section>
+
+    <!-- SCREEN 2: GAMEPLAY -->
+    <section id="screen-game" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- LEFT / MAIN PANEL: QUESTION & OPTIONS -->
+      <div class="lg:col-span-2 glass-panel rounded-3xl p-5 md:p-8 flex flex-col justify-between shadow-2xl relative border-cyan-500/20">
+        
+        <div>
+          <!-- TOP STATUS BAR -->
+          <div class="flex justify-between items-center mb-4">
+            <span id="question-count" class="px-3 py-1 rounded-full bg-slate-800 text-cyan-400 text-xs font-semibold border border-slate-700">
+              Soal 1 dari 25
+            </span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400">Total Skor:</span>
+              <span id="player-score" class="text-xl font-black text-amber-400">0</span>
+            </div>
+          </div>
+
+          <!-- PROGRESS BAR & TIMER -->
+          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-4">
+            <div id="time-bar" class="bg-gradient-to-r from-cyan-400 to-pink-500 h-full w-full transition-all duration-100 ease-linear"></div>
+          </div>
+
+          <div class="flex justify-between items-center mb-4">
+            <div id="timer-text" class="text-sm font-bold text-pink-400 flex items-center gap-1">
+              ⏳ Sisa Waktu: <span id="time-left" class="text-lg font-black text-white">10</span> detik
+            </div>
+            <div class="text-xs text-slate-400 italic">Jawab cepat & tepat untuk skor maksimal!</div>
+          </div>
+
+          <!-- 2D VISUAL CANVAS DIAGRAM -->
+          <div class="mb-4 bg-slate-950/80 rounded-2xl p-2 border border-slate-800 flex justify-center items-center h-36 overflow-hidden relative">
+            <canvas id="respiratory-canvas" width="400" height="140" class="max-w-full h-auto"></canvas>
+            <div id="diagram-label" class="absolute bottom-2 right-3 text-[10px] bg-slate-900/80 px-2 py-0.5 rounded text-cyan-300 font-mono border border-cyan-500/30">
+              Simulasi Lingkungan & Organ
+            </div>
+          </div>
+
+          <!-- QUESTION TEXT -->
+          <div class="mb-5">
+            <h3 id="question-text" class="text-base md:text-lg font-bold text-white leading-relaxed">
+              Memuat pertanyaan...
+            </h3>
+          </div>
+        </div>
+
+        <!-- ANSWER OPTIONS -->
+        <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Options rendered dynamically -->
+        </div>
+
+      </div>
+
+      <!-- RIGHT PANEL: LEADERBOARD -->
+      <div class="glass-panel rounded-3xl p-5 flex flex-col justify-between shadow-2xl border-pink-500/20">
+        <div>
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-700/80">
+            <h3 class="font-bold text-white flex items-center gap-2 text-sm md:text-base">
+              🏆 Papan Peringkat Real-Time
+            </h3>
+            <span class="text-[10px] bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded font-semibold">LIVE</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-4">Peringkat diperbarui langsung berdasarkan waktu merespons dan ketepatan jawaban:</p>
+          
+          <div id="leaderboard-list" class="space-y-2">
+            <!-- Leaderboard items rendered dynamically -->
+          </div>
+        </div>
+
+        <div class="mt-6 pt-3 border-t border-slate-700/60 text-center">
+          <p class="text-[11px] text-slate-500">Rumus Perhitungan Skor: <br/><code class="text-cyan-400">Skor = 100 + (Sisa Waktu/Total Waktu × 50)</code></p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SCREEN 3: RESULT / REPORT CARD -->
+    <section id="screen-result" class="hidden glass-panel rounded-3xl p-6 md:p-10 max-w-3xl mx-auto w-full text-center shadow-2xl border-cyan-500/30">
+      <div class="text-5xl mb-3">🎓</div>
+      <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-1">Permainan Selesai!</h2>
+      <p class="text-sm text-slate-400 mb-6">Laporan Hasil Evaluasi Analisis Kuis IPAS</p>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+          <div class="text-xs text-slate-400 mb-1">Total Skor</div>
+          <div id="result-score" class="text-2xl font-black text-amber-400">0</div>
+        </div>
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+          <div class="text-xs text-slate-400 mb-1">Akurasi</div>
+          <div id="result-accuracy" class="text-2xl font-black text-emerald-400">0%</div>
+        </div>
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+          <div class="text-xs text-slate-400 mb-1">Peringkat</div>
+          <div id="result-rank" class="text-2xl font-black text-pink-400">#0</div>
+        </div>
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+          <div class="text-xs text-slate-400 mb-1">Predikat</div>
+          <div id="result-grade" class="text-2xl font-black text-cyan-400">A</div>
+        </div>
+      </div>
+
+      <div class="space-y-2 mb-6 text-left bg-slate-900/80 p-4 rounded-2xl border border-slate-800 max-h-56 overflow-y-auto" id="eval-summary">
+        <!-- Summary list rendered dynamically -->
+      </div>
+
+      <button 
+        onclick="restartGame()" 
+        class="py-3.5 px-8 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 font-bold text-white tracking-wider uppercase text-sm btn-cyber">
+        🔄 Ulangi Kuis
+      </button>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="text-center py-3 text-xs text-slate-500">
+    &copy; 2026 Game Kuis Edukasi IPAS • Sistem Pernapasan & Lingkungan
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // --- 1. DATA 25 SOAL PERNAPASAN & LINGKUNGAN ---
+    const rawQuestions = [
+      {
+        q: "Mengapa faktor genetik perlu dipertimbangkan ketika membahas gangguan pernapasan?",
+        options: [
+          "Karena semua gangguan pernapasan pasti diwariskan",
+          "Karena genetik menyebabkan semua jenis polusi",
+          "Karena faktor genetik dapat berhubungan dengan gangguan seperti asma",
+          "Karena faktor genetik membuat udara menjadi kotor"
+        ],
+        answer: 2,
+        type: "genetik"
+      },
+      {
+        q: "Jika suatu wilayah memiliki banyak kendaraan tetapi masyarakat jarang mengalami gangguan pernapasan, pernyataan yang paling hati-hati adalah ....",
+        options: [
+          "Kendaraan tidak menghasilkan polutan",
+          "Polusi kendaraan tidak pernah berbahaya",
+          "Semua warga pasti kebal terhadap polusi",
+          "Data tersebut saja belum cukup untuk menyimpulkan bahwa polusi tidak berisiko"
+        ],
+        answer: 3,
+        type: "polusi"
+      },
+      {
+        q: "Mengapa membandingkan kondisi dua lingkungan dapat membantu mempelajari pengaruh udara terhadap kesehatan?",
+        options: [
+          "Agar dapat mengetahui lingkungan yang memiliki rumah paling banyak",
+          "Agar dapat mengidentifikasi perbedaan kondisi udara dan kemungkinan dampaknya",
+          "Agar dapat menentukan lingkungan yang paling ramai",
+          "Agar dapat menghitung jumlah kendaraan saja"
+        ],
+        answer: 1,
+        type: "analisis"
+      },
+      {
+        q: "Dalam kegiatan penyelidikan, kelompok A menemukan bahwa asap kendaraan menjadi faktor gangguan. Kelompok B menemukan pembakaran sampah sebagai faktor. Kesimpulan yang paling tepat adalah ....",
+        options: [
+          "Salah satu kelompok pasti keliru",
+          "Hanya asap kendaraan yang berbahaya",
+          "Keduanya dapat benar karena berbagai sumber polusi dapat mengganggu pernapasan",
+          "Pembakaran sampah tidak termasuk polusi"
+        ],
+        answer: 2,
+        type: "polusi"
+      },
+      {
+        q: "Mengapa hasil penyelidikan antarkelompok dapat berbeda?",
+        options: [
+          "Karena hanya satu kelompok yang boleh benar",
+          "Karena gangguan pernapasan tidak dapat diamati",
+          "Karena setiap kelompok mungkin menemukan kondisi atau kasus lingkungan yang berbeda",
+          "Karena semua data harus dibuat sama"
+        ],
+        answer: 2,
+        type: "analisis"
+      },
+      {
+        q: "Seorang siswa membuat kesimpulan: “Gangguan pernapasan hanya disebabkan oleh polusi udara.” Berdasarkan materi, kelemahan kesimpulan tersebut adalah ....",
+        options: [
+          "Polusi udara tidak pernah menyebabkan gangguan pernapasan",
+          "Ada faktor lain seperti infeksi, faktor genetik, dan gaya hidup",
+          "Gangguan pernapasan hanya disebabkan cuaca",
+          "Semua gangguan pernapasan disebabkan olahraga"
+        ],
+        answer: 1,
+        type: "genetik"
+      },
+      {
+        q: "Seorang siswa ingin membuat poster tentang kesehatan pernapasan. Informasi yang paling sesuai dengan materi adalah ....",
+        options: [
+          "“Semua asap aman jika tidak berwarna.”",
+          "“Polusi hanya mengganggu orang yang sudah sakit.”",
+          "“Mengurangi paparan polutan membantu menjaga kesehatan sistem pernapasan.”",
+          "“Hidung mampu menyaring seluruh zat berbahaya.”"
+        ],
+        answer: 2,
+        type: "pencegahan"
+      },
+      {
+        q: "Perhatikan kegiatan berikut:\n1. Membakar sampah di halaman.\n2. Menghirup asap kendaraan.\n3. Berada di tempat dengan udara bersih.\n4. Menghirup asap pabrik.\nKegiatan yang paling berpotensi meningkatkan paparan polutan adalah ....",
+        options: [
+          "Hanya kegiatan ketiga",
+          "Kegiatan pertama dan ketiga",
+          "Kegiatan kedua dan ketiga",
+          "Kegiatan pertama, kedua, dan keempat"
+        ],
+        answer: 3,
+        type: "polusi"
+      },
+      {
+        q: "Seorang siswa mengamati bahwa setelah pembakaran sampah, muncul bau menyengat, jelaga, dan asap. Berdasarkan materi, pengamatan tersebut menunjukkan ....",
+        options: [
+          "Pembakaran menghasilkan udara bersih",
+          "Semua hasil pembakaran aman",
+          "Pembakaran dapat menghasilkan berbagai zat atau sisa yang berpotensi membahayakan kesehatan",
+          "Jelaga membantu membersihkan paru-paru"
+        ],
+        answer: 2,
+        type: "polusi"
+      },
+      {
+        q: "Dalam percobaan menggunakan kapas dan asap lilin, kapas digunakan sebagai analogi ....",
+        options: [
+          "Hidung",
+          "Tenggorokan",
+          "Jantung",
+          "Paru-paru"
+        ],
+        answer: 3,
+        type: "paru"
+      },
+      {
+        q: "Tujuan utama analogi kapas dan asap lilin dalam kegiatan pembelajaran adalah ....",
+        options: [
+          "Membuktikan bahwa paru-paru terbuat dari kapas",
+          "Membantu memahami kemungkinan perubahan akibat paparan asap",
+          "Membuktikan semua asap memiliki komposisi sama",
+          "Menentukan jenis penyakit seseorang"
+        ],
+        answer: 1,
+        type: "paru"
+      },
+      {
+        q: "Jika setelah terkena asap kapas mengalami perubahan, kesimpulan yang paling tepat dari percobaan tersebut adalah ....",
+        options: [
+          "Paru-paru manusia pasti berubah persis seperti kapas",
+          "Semua asap pasti memiliki efek yang sama",
+          "Paparan asap dapat digunakan sebagai analogi untuk memahami dampaknya terhadap paru-paru",
+          "Kapas dan paru-paru memiliki fungsi yang sama"
+        ],
+        answer: 2,
+        type: "paru"
+      },
+      {
+        q: "Mengapa hasil percobaan kapas tidak boleh langsung dianggap sebagai bukti bahwa paru-paru manusia akan berubah persis sama?",
+        options: [
+          "Karena kapas tidak dapat terkena asap",
+          "Karena asap tidak memengaruhi benda",
+          "Karena kapas hanyalah analogi untuk membantu memahami dampak paparan asap",
+          "Karena paru-paru tidak pernah terkena udara"
+        ],
+        answer: 2,
+        type: "paru"
+      },
+      {
+        q: "Sebuah keluarga ingin mengetahui lokasi di sekitar rumah yang paling membutuhkan perhatian terkait kesehatan pernapasan. Data yang paling berguna untuk dikumpulkan adalah ....",
+        options: [
+          "Warna rumah dan jumlah pintu",
+          "Jumlah penghuni rumah saja",
+          "Kondisi lingkungan, peristiwa yang terjadi, serta potensi dampaknya terhadap pernapasan",
+          "Ukuran halaman rumah saja"
+        ],
+        answer: 2,
+        type: "analisis"
+      },
+      {
+        q: "Di suatu lingkungan ditemukan pembakaran sampah rumah tangga setiap sore. Usulan perbaikan yang paling relevan berdasarkan kegiatan pada buku adalah ....",
+        options: [
+          "Membiarkan karena hanya dilakukan sore hari",
+          "Menambah jumlah sampah yang dibakar",
+          "Menyampaikan usulan perbaikan kondisi lingkungan kepada pihak yang berwenang setelah didukung hasil pengamatan",
+          "Menutup semua jalan di lingkungan tersebut"
+        ],
+        answer: 2,
+        type: "pencegahan"
+      },
+      {
+        q: "Pernyataan berikut yang menunjukkan kemampuan menganalisis adalah ....",
+        options: [
+          "“Polusi adalah udara kotor.”",
+          "“Influenza disebabkan virus.”",
+          "“Jika seseorang terus-menerus terpapar asap, risiko gangguan pernapasannya dapat meningkat karena kualitas udara yang dihirup buruk.”",
+          "“Asma adalah gangguan pernapasan.”"
+        ],
+        answer: 2,
+        type: "analisis"
+      },
+      {
+        q: "Pernyataan “semakin buruk kualitas udara, semakin tinggi risiko gangguan pernapasan” menunjukkan hubungan ....",
+        options: [
+          "Bagian dan keseluruhan",
+          "Persamaan dan perbedaan",
+          "Sebab dan risiko/dampak",
+          "Urutan waktu saja"
+        ],
+        answer: 2,
+        type: "analisis"
+      },
+      {
+        q: "Sebuah lingkungan memiliki dua masalah: asap kendaraan dan pembakaran sampah. Jika warga hanya mengatasi pembakaran sampah tetapi lalu lintas tetap menghasilkan banyak asap, maka ....",
+        options: [
+          "Risiko gangguan pasti menjadi nol",
+          "Salah satu sumber paparan telah dikurangi, tetapi sumber polusi lainnya masih perlu diperhatikan",
+          "Udara pasti langsung menjadi bersih",
+          "Semua gangguan pernapasan akan hilang"
+        ],
+        answer: 1,
+        type: "polusi"
+      },
+      {
+        q: "Seorang siswa menyusun langkah penyelidikan: (1) Menentukan faktor penyebab, (2) Mengamati kasus, (3) Menentukan gangguan yang mungkin, (4) Menentukan cara pencegahan. Urutan yang lebih sesuai adalah ....",
+        options: [
+          "4–3–2–1",
+          "1–4–2–3",
+          "2–1–3–4",
+          "3–1–4–2"
+        ],
+        answer: 2,
+        type: "analisis"
+      },
+      {
+        q: "Perhatikan tindakan: (1) Rani menghindari asap kendaraan, (2) Sinta sering berada di tempat asap pembakaran, (3) Tono menjaga lingkungan agar tidak ada pembakaran sampah. Tindakan yang sesuai dengan upaya menjaga kualitas udara adalah ....",
+        options: [
+          "Hanya tindakan Sinta",
+          "Tindakan Rani dan Tono",
+          "Tindakan Sinta dan Tono",
+          "Ketiganya sama"
+        ],
+        answer: 1,
+        type: "pencegahan"
+      },
+      {
+        q: "Jika suatu penyakit memiliki gejala yang mirip dengan penyakit lain, cara terbaik dalam pembelajaran berdasarkan materi adalah ....",
+        options: [
+          "Langsung menyimpulkan tanpa melihat penyebab",
+          "Memilih penyakit yang paling terkenal",
+          "Membandingkan ciri, penyebab, dan informasi lain yang tersedia",
+          "Menganggap semua penyakit sama"
+        ],
+        answer: 2,
+        type: "analisis"
+      },
+      {
+        q: "Pernyataan manakah yang paling menunjukkan hubungan antara lingkungan dan kesehatan?",
+        options: [
+          "Lingkungan hanya memengaruhi tumbuhan",
+          "Kondisi lingkungan tidak berkaitan dengan pernapasan",
+          "Asap dari kendaraan, pabrik, atau pembakaran dapat menjadi faktor yang mengganggu sistem pernapasan",
+          "Semua gangguan pernapasan berasal dari faktor genetik"
+        ],
+        answer: 2,
+        type: "polusi"
+      },
+      {
+        q: "Jika sekolah ingin membuat program sederhana untuk menjaga kesehatan sistem pernapasan, program yang paling sesuai adalah ....",
+        options: [
+          "Membakar sampah setiap Jumat",
+          "Membiarkan kendaraan menyalakan mesin di sekitar kelas",
+          "Mengidentifikasi sumber polusi di lingkungan sekolah dan membuat usulan perbaikan",
+          "Menutup semua ventilasi kelas"
+        ],
+        answer: 2,
+        type: "pencegahan"
+      },
+      {
+        q: "“Tidak semua orang yang menghirup udara tercemar langsung menunjukkan gejala. Jadi, polusi udara tidak berbahaya.” Kesalahan penalaran pada pernyataan tersebut adalah ....",
+        options: [
+          "Menganggap udara tidak dapat masuk ke paru-paru",
+          "Menganggap semua orang memiliki penyakit yang sama",
+          "Menganggap tidak adanya gejala langsung berarti tidak adanya risiko gangguan pernapasan",
+          "Menganggap hidung berfungsi menyaring udara"
+        ],
+        answer: 2,
+        type: "analisis"
+      },
+      {
+        q: "Di sebuah lingkungan terdapat pembakaran sampah, asap kendaraan, dan seorang warga yang sensitif terhadap udara dingin. Kesimpulan yang paling tepat adalah ....",
+        options: [
+          "Sesak napas pasti hanya disebabkan oleh udara dingin",
+          "Sesak napas pasti hanya disebabkan oleh asap kendaraan",
+          "Pembakaran sampah tidak mungkin berpengaruh",
+          "Beberapa faktor dapat berpotensi berkontribusi terhadap gangguan pernapasan sehingga kondisi lingkungan dan faktor individu perlu diperhatikan"
+        ],
+        answer: 3,
+        type: "analisis"
+      }
+    ];
+
+    // --- 2. TEMAN SEKELAS BOT (SIMULASI LEADERBOARD) ---
+    const initialBots = [
+      { name: "Siti Rahma", score: 0, speedBonus: 0.90 },
+      { name: "Riko Febrian", score: 0, speedBonus: 0.85 },
+      { name: "Budi Santoso", score: 0, speedBonus: 0.75 },
+      { name: "Dewi Melani", score: 0, speedBonus: 0.65 },
+      { name: "Ahmad Zaki", score: 0, speedBonus: 0.55 }
+    ];
+
+    // --- 3. STATE APLIKASI ---
+    let playerName = "";
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let playerScore = 0;
+    let correctCount = 0;
+    let timerInterval = null;
+    let timeLeft = 10; // 10 detik per soal
+    const QUESTION_TIME = 10;
+    let botList = [];
+    let playerAnswersHistory = [];
+
+    // --- 4. WEB AUDIO SYNTHESIZER ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'correct') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(164.81, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'tick') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+    }
+
+    // --- 5. ALGORITMA SHUFFLE (FISHER-YATES) ---
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // --- 6. START GAME & INITIALIZATION ---
+    function startGame(e) {
+      e.preventDefault();
+      playSound('click');
+
+      const nameInput = document.getElementById('player-name').value.trim();
+      if (!nameInput) return;
+
+      playerName = nameInput;
+      document.getElementById('display-player-name').innerText = playerName;
+
+      // Acak urutan soal & acak urutan pilihan jawaban
+      currentQuestions = shuffleArray(rawQuestions).map(q => {
+        const optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.answer }));
+        const shuffledOpts = shuffleArray(optionsWithIndex);
+        return {
+          q: q.q,
+          options: shuffledOpts.map(o => o.text),
+          answer: shuffledOpts.findIndex(o => o.isCorrect),
+          type: q.type
+        };
+      });
+
+      // Reset State
+      currentQuestionIndex = 0;
+      playerScore = 0;
+      correctCount = 0;
+      playerAnswersHistory = [];
+
+      // Reset Bots
+      botList = initialBots.map(bot => ({ ...bot, score: 0 }));
+
+      // Switch Screens
+      document.getElementById('screen-login').classList.add('hidden');
+      document.getElementById('screen-result').classList.add('hidden');
+      document.getElementById('screen-game').classList.remove('hidden');
+
+      updateLeaderboard();
+      loadQuestion();
+    }
+
+    // --- 7. LOAD QUESTION & TIMER ---
+    function loadQuestion() {
+      if (currentQuestionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+      }
+
+      const qData = currentQuestions[currentQuestionIndex];
+
+      // Update Header Text
+      document.getElementById('question-count').innerText = `Soal ${currentQuestionIndex + 1} dari ${currentQuestions.length}`;
+      document.getElementById('question-text').innerText = qData.q;
+      document.getElementById('player-score').innerText = playerScore;
+
+      // Draw 2D Visual Canvas
+      draw2DVisual(qData.type);
+
+      // Render Options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      const labels = ['A', 'B', 'C', 'D'];
+      qData.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `w-full text-left p-3.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700/80 hover:border-cyan-400/50 flex items-start gap-3 transition-all text-xs md:text-sm font-semibold text-white group cursor-pointer`;
+        btn.onclick = () => selectAnswer(idx);
+        btn.innerHTML = `
+          <span class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-700 text-cyan-400 group-hover:text-white group-hover:bg-cyan-500 flex items-center justify-center font-bold text-xs shrink-0 transition-all">
+            ${labels[idx]}
+          </span>
+          <span class="leading-relaxed mt-0.5">${opt}</span>
+        `;
+        optionsContainer.appendChild(btn);
+      });
+
+      // Start Timer
+      timeLeft = QUESTION_TIME;
+      updateTimerUI();
+
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        playSound('tick');
+        updateTimerUI();
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          selectAnswer(-1); // Timeout
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      document.getElementById('time-left').innerText = timeLeft;
+      const pct = (timeLeft / QUESTION_TIME) * 100;
+      document.getElementById('time-bar').style.width = `${pct}%`;
+    }
+
+    // --- 8. SELECT ANSWER & SCORING RUMUS ---
+    function selectAnswer(selectedIndex) {
+      clearInterval(timerInterval);
+      const qData = currentQuestions[currentQuestionIndex];
+      const isCorrect = selectedIndex === qData.answer;
+
+      // Nonaktifkan tombol agar tak terpencet ganda
+      const btns = document.querySelectorAll('#options-container button');
+      btns.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === qData.answer) {
+          btn.classList.add('border-emerald-500', 'bg-emerald-950/70', 'text-emerald-200');
+        } else if (idx === selectedIndex && !isCorrect) {
+          btn.classList.add('border-pink-500', 'bg-pink-950/70', 'text-pink-200');
+        }
+      });
+
+      // Perhitungan Skor
+      let earnedScore = 0;
+      if (isCorrect) {
+        playSound('correct');
+        correctCount++;
+        // RUMUS: 100 skor dasar + bonus sisa waktu
+        earnedScore = 100 + Math.round((timeLeft / QUESTION_TIME) * 50);
+        playerScore += earnedScore;
+      } else {
+        playSound('wrong');
+      }
+
+      playerAnswersHistory.push({
+        question: qData.q,
+        isCorrect: isCorrect,
+        earnedScore: earnedScore
+      });
+
+      // Simulasi Skor Bot Teman Sekelas
+      botList.forEach(bot => {
+        if (Math.random() < bot.speedBonus) {
+          const botTime = Math.floor(Math.random() * 5) + 3;
+          bot.score += 100 + Math.round((botTime / QUESTION_TIME) * 50);
+        }
+      });
+
+      updateLeaderboard();
+
+      // Pindah ke soal berikutnya setelah jeda 1.2 detik
+      setTimeout(() => {
+        currentQuestionIndex++;
+        loadQuestion();
+      }, 1200);
+    }
+
+    // --- 9. UPDATE LEADERBOARD ---
+    function updateLeaderboard() {
+      const allPlayers = [
+        { name: playerName, score: playerScore, isPlayer: true },
+        ...botList.map(b => ({ name: b.name, score: b.score, isPlayer: false }))
+      ];
+
+      allPlayers.sort((a, b) => b.score - a.score);
+
+      const listEl = document.getElementById('leaderboard-list');
+      listEl.innerHTML = '';
+
+      allPlayers.forEach((p, idx) => {
+        const item = document.createElement('div');
+        const rankColor = idx === 0 ? 'text-amber-400 border-amber-500/40 bg-amber-500/10' :
+                          idx === 1 ? 'text-slate-300 border-slate-400/40 bg-slate-500/10' :
+                          idx === 2 ? 'text-amber-600 border-amber-700/40 bg-amber-800/10' :
+                          'text-slate-400 border-slate-800 bg-slate-900/50';
+
+        item.className = `flex items-center justify-between p-2 rounded-xl border ${rankColor} ${p.isPlayer ? 'ring-2 ring-cyan-400/80 bg-cyan-950/40' : ''} transition-all`;
+        
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="font-black text-xs w-4 text-center">${idx + 1}</span>
+            <span class="text-xs font-bold text-white ${p.isPlayer ? 'text-cyan-300' : ''}">
+              ${p.name} ${p.isPlayer ? '(Kamu)' : ''}
+            </span>
+          </div>
+          <span class="text-xs font-black text-amber-400">${p.score} XP</span>
+        `;
+        listEl.appendChild(item);
+      });
+    }
+
+    // --- 10. END GAME & REPORT ---
+    function endGame() {
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-result').classList.remove('hidden');
+
+      const accuracy = Math.round((correctCount / currentQuestions.length) * 100);
+      
+      document.getElementById('result-score').innerText = playerScore;
+      document.getElementById('result-accuracy').innerText = `${accuracy}%`;
+
+      // Hitung Peringkat Akhir
+      const allPlayers = [
+        { name: playerName, score: playerScore },
+        ...botList.map(b => ({ name: b.name, score: b.score }))
+      ].sort((a, b) => b.score - a.score);
+
+      const rank = allPlayers.findIndex(p => p.name === playerName) + 1;
+      document.getElementById('result-rank').innerText = `#${rank}`;
+
+      // Predikat Nilai
+      let grade = 'C';
+      if (accuracy >= 90) grade = 'A+';
+      else if (accuracy >= 80) grade = 'A';
+      else if (accuracy >= 70) grade = 'B';
+      else if (accuracy >= 60) grade = 'C';
+      else grade = 'D';
+
+      document.getElementById('result-grade').innerText = grade;
+
+      // Summary list
+      const evalContainer = document.getElementById('eval-summary');
+      evalContainer.innerHTML = `<h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2">Ringkasan Hasil Jawaban:</h4>`;
+      playerAnswersHistory.forEach((hist, idx) => {
+        const item = document.createElement('div');
+        item.className = `text-xs p-2 rounded-lg ${hist.isCorrect ? 'bg-emerald-950/40 text-emerald-300 border border-emerald-800/50' : 'bg-pink-950/40 text-pink-300 border border-pink-800/50'} flex justify-between items-center gap-2`;
+        item.innerHTML = `
+          <span class="truncate">Soal ${idx + 1}: ${hist.question}</span>
+          <span class="font-bold shrink-0">${hist.isCorrect ? `+${hist.earnedScore} XP` : 'Salah'}</span>
+        `;
+        evalContainer.appendChild(item);
+      });
+    }
+
+    function restartGame() {
+      playSound('click');
+      document.getElementById('screen-result').classList.add('hidden');
+      document.getElementById('screen-login').classList.remove('hidden');
+    }
+
+    // --- 11. CANVAS 2D DRAWING VISUAL ---
+    function draw2DVisual(type) {
+      const canvas = document.getElementById('respiratory-canvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Grid Line Background
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 20) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+
+      const centerX = w / 2;
+
+      // Draw Paru-Paru / Organ Base
+      ctx.fillStyle = (type === 'paru' || type === 'genetik') ? 'rgba(6, 182, 212, 0.3)' : 'rgba(100, 116, 139, 0.2)';
+      ctx.strokeStyle = (type === 'paru' || type === 'genetik') ? '#06b6d4' : '#475569';
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.ellipse(centerX - 30, 70, 20, 30, -0.2, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(centerX + 30, 70, 20, 30, 0.2, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+
+      // Smoke / Pollution Effect
+      if (type === 'polusi' || type === 'pencegahan') {
+        ctx.fillStyle = type === 'polusi' ? 'rgba(236, 72, 153, 0.25)' : 'rgba(16, 185, 129, 0.25)';
+        for (let i = 0; i < 5; i++) {
+          ctx.beginPath();
+          ctx.arc(centerX - 80 + (i * 40), 30 + (i % 2 * 10), 12 + i, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Labeling Text Indicator
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '11px Outfit, sans-serif';
+      const labelText = type === 'genetik' ? 'Faktor Genetik & Individu' :
+                        type === 'polusi' ? 'Asap & Paparan Polutan' :
+                        type === 'pencegahan' ? 'Upaya Pencegahan & Kesehatan' :
+                        type === 'paru' ? 'Analogi Paru-paru & Kapas' : 'Analisis Kasus Lingkungan';
+      ctx.fillText(labelText, 10, 20);
+    }
+
+    // Initial Render
+    window.onload = () => {
+      draw2DVisual('polusi');
+    };
+  </script>
+</body>
+</html>
